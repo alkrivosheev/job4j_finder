@@ -1,12 +1,7 @@
 package ru.job4j.finder;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.FileVisitor;
-import java.nio.file.Path;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,13 +10,20 @@ import java.util.function.Predicate;
 import static java.nio.file.FileVisitResult.CONTINUE;
 
 public class FileWalker implements FileVisitor<Path> {
-    private static final Logger LOG = LoggerFactory.getLogger(SearchFile.class.getName());
-    private Predicate<Path> condition;
-    private List<Path> paths;
-    public FileWalker(Predicate<Path
-            > condition) {
-        this.condition = condition;
+    private final Predicate<Path> condition;
+//    private final PathMatcher matcher;
+    private final List<Path> paths;
+//    public FileWalker(String pattern, String  mode) {
+public FileWalker(Predicate<Path> condition) {
+//        String syntax = "";
         paths = new ArrayList<>();
+
+//        switch (mode) {
+//            case "mask", "name" -> syntax = "glob:";
+//            case "regex" -> syntax = "regex:";
+//        }
+//        matcher = FileSystems.getDefault().getPathMatcher(syntax + pattern);
+        this.condition = condition;
     }
     @Override
     public FileVisitResult preVisitDirectory(Path directory,
@@ -32,9 +34,9 @@ public class FileWalker implements FileVisitor<Path> {
     @Override
     public FileVisitResult visitFile(Path file,
             BasicFileAttributes attributes) throws IOException {
-        System.out.println(file.toAbsolutePath());
-        LOG.info("Found file: {}", file.toAbsolutePath());
-        if (this.condition.test(file)) {
+
+        if (this.condition.test(file.getFileName())) {
+//        if (this.matcher.matches(file.getFileName())) {
             paths.add(file);
         }
         return CONTINUE;
