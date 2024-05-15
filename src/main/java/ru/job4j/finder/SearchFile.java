@@ -14,7 +14,7 @@ import java.util.regex.PatternSyntaxException;
 
 public class SearchFile {
     private static final Logger LOG = LoggerFactory.getLogger(SearchFile.class.getName());
-    private static final Map<String, String> values = new HashMap<String, String>();
+    private static final Map<String, String> MAP_VAL = new HashMap<String, String>();
     public static boolean validate(String[] args) {
         boolean res;
         if (args.length < 4) {
@@ -35,7 +35,7 @@ public class SearchFile {
             if ("o".equals(words[0]) && !Files.exists(Path.of(words[1]).toAbsolutePath().getParent())) {
                 throw new IllegalArgumentException(String.format("Error: This Directory '%s' not exists. Use folder name for Log directory. Usage: ' logs\\ ' or ' C:\\' ", words[1]));
             }
-            values.put(words[0], words[1]);
+            MAP_VAL.put(words[0], words[1]);
         }
         res = true;
 
@@ -43,7 +43,7 @@ public class SearchFile {
     }
 
     public static String value(String key) {
-        return values.get(key);
+        return MAP_VAL.get(key);
     }
 
     public static List<Path> search(Path root, Predicate<Path> condition) throws IOException {
@@ -74,6 +74,9 @@ public class SearchFile {
                     testRegex(value("n"));
                     PathMatcher matcher =  FileSystems.getDefault().getPathMatcher("regex:" + value("n"));
                     res = search(start, path -> matcher.matches(path));
+                }
+                default -> {
+                    throw new IllegalArgumentException(String.format("Parameter '%s' are not specified. ", value("t")));
                 }
             }
         }
