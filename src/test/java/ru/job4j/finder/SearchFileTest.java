@@ -64,14 +64,16 @@ class SearchFileTest {
 
     @Test
     void whenNoPrefixThenExceptionThrown() {
-        assertThatThrownBy(() -> SearchFile.get(new String[]{"-d=c:\\test", "n=*.sql", "-t=mask", "-o=log.txt"}))
+        String dirName = "-d=" + tempDir.toAbsolutePath();
+        assertThatThrownBy(() -> SearchFile.get(new String[]{dirName, "n=*.sql", "-t=mask", "-o=log.txt"}))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Error: This argument 'n=*.sql' does not start with a '-' character");
     }
 
     @Test
     void whenNoEqualThenExceptionThrown() {
-        assertThatThrownBy(() -> SearchFile.get(new String[]{"-d=c:\\test", "-n=*.sql", "-tmask", "-o=log.txt"}))
+        String dirName = "-d=" + tempDir.toAbsolutePath();
+        assertThatThrownBy(() -> SearchFile.get(new String[]{dirName, "-n=*.sql", "-tmask", "-o=log.txt"}))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Error: This argument '-tmask' does not contain an equal sign");
     }
@@ -85,14 +87,16 @@ class SearchFileTest {
 
     @Test
     void whenGetRegexError() throws IOException {
-        assertThatThrownBy(() -> SearchFile.get(new String[]{"-d=c:\\test", "-n=^[A-Za-z]{1,12\\.[A-Za-z]{1,3}$", "-t=regex", "-o=log.txt"}))
+        String dirName = "-d=" + tempDir.toAbsolutePath();
+        assertThatThrownBy(() -> SearchFile.get(new String[]{dirName, "-n=^[A-Za-z]{1,12\\.[A-Za-z]{1,3}$", "-t=regex", "-o=log.txt"}))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Error: This regex '^[A-Za-z]{1,12\\.[A-Za-z]{1,3}$' does not valid");
     }
 
     @Test
     void whenGetLogFileError() throws IOException {
-        assertThatThrownBy(() -> SearchFile.get(new String[]{"-d=c:\\test", "-n=^[A-Za-z]{1,12}\\.[A-Za-z]{1,3}$", "-t=regex", "-o=logs1/debug1.txt"}))
+        String dirName = "-d=" + tempDir.toAbsolutePath();
+        assertThatThrownBy(() -> SearchFile.get(new String[]{dirName, "-n=^[A-Za-z]{1,12}\\.[A-Za-z]{1,3}$", "-t=regex", "-o=logs1/debug1.txt"}))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Error: This Directory 'logs1/debug1.txt' not exists. Use folder name for Log directory. Usage: ' logs\\ ' or ' C:\\' ");
     }
