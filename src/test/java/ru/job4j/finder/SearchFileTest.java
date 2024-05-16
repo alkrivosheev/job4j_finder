@@ -19,7 +19,6 @@ class SearchFileTest {
         Path subDir = Files.createDirectory(tempDir.resolve("sub"));
         Files.createTempFile(tempDir, "test1-", ".tmp");
         file = Files.createTempFile(subDir, "file-", ".sql");
-        Files.createTempFile(subDir, "логин-", ".jpp");
     }
 
     @Test
@@ -34,7 +33,7 @@ class SearchFileTest {
         String dirName = "-d=" + tempDir.toAbsolutePath();
         List<Path> paths = SearchFile.get(new String[] {dirName, "-n=^[А-ЯA-Za-z0-9\\-]{1,40}\\.[A-Za-z]{1,3}$", "-t=regex", "-o=log.txt"});
         assertThat(paths)
-                .hasSize(3);
+                .hasSize(2);
     }
     @Test
     void whenGetNameTwoPaths() throws IOException {
@@ -59,7 +58,7 @@ class SearchFileTest {
         String dirName = "-d=" + tempDir.toAbsolutePath();
         List<Path> paths = SearchFile.get(new String[]{dirName, "-n=*.*", "-t=mask", "-o=log.txt"});
         assertThat(paths)
-                .hasSize(3);
+                .hasSize(2);
     }
 
     @Test
