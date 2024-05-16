@@ -19,7 +19,7 @@ class SearchFileTest {
         Path subDir = Files.createDirectory(tempDir.resolve("sub"));
         Files.createTempFile(tempDir, "test1-", ".tmp");
         file = Files.createTempFile(subDir, "file-", ".sql");
-        Files.createTempFile(subDir, "логин-", ".jar");
+        Files.createTempFile(subDir, "логин-", ".jpp");
     }
 
     @Test
