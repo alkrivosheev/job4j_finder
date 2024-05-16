@@ -32,7 +32,7 @@ class SearchFileTest {
     @Test
     void whenGetRegexAllPaths() throws IOException {
         String dirName = "-d=" + tempDir.toAbsolutePath();
-        List<Path> paths = SearchFile.get(new String[] {dirName, "-n=^[А-ЯA-Za-z0-9\\-]{1,30}\\.[A-Za-z]{1,3}$", "-t=regex", "-o=log.txt"});
+        List<Path> paths = SearchFile.get(new String[] {dirName, "-n=^[А-ЯA-Za-z0-9\\-]{1,40}\\.[A-Za-z]{1,3}$", "-t=regex", "-o=log.txt"});
         assertThat(paths)
                 .hasSize(3);
     }
