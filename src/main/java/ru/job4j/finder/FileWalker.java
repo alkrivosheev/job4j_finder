@@ -12,10 +12,12 @@ import static java.nio.file.FileVisitResult.CONTINUE;
 public class FileWalker implements FileVisitor<Path> {
     private final Predicate<Path> condition;
     private final List<Path> paths;
+
 public FileWalker(Predicate<Path> condition) {
         paths = new ArrayList<>();
         this.condition = condition;
     }
+
     @Override
     public FileVisitResult preVisitDirectory(Path directory,
             BasicFileAttributes attributes) throws IOException {
@@ -43,6 +45,7 @@ public FileWalker(Predicate<Path> condition) {
             IOException exception) throws IOException {
         return CONTINUE;
     }
+
     public List<Path> getPaths() {
         return paths;
     }

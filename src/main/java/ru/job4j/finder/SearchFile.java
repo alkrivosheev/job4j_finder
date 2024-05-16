@@ -1,9 +1,9 @@
 package ru.job4j.finder;
+
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.PatternLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
@@ -11,10 +11,10 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-
 public class SearchFile {
     private static final Logger LOG = LoggerFactory.getLogger(SearchFile.class.getName());
-    private static final Map<String, String> MAP_VAL = new HashMap<String, String>();
+    private static final Map<String, String> MAP_VAL = new HashMap<>();
+
     public static boolean validate(String[] args) {
         boolean res;
         if (args.length < 4) {
@@ -65,7 +65,9 @@ public class SearchFile {
         if (validate(args)) {
             Path start = Paths.get(value("d"));
             switch (value("t")) {
-                case "name" -> res = search(start, path -> path.toFile().getName().endsWith(value("n")));
+                case "name" -> {
+                    res = search(start, path -> path.toFile().getName().endsWith(value("n")));
+                }
                 case "mask" -> {
                     PathMatcher matcher =  FileSystems.getDefault().getPathMatcher("glob:" + value("n"));
                     res = search(start, path -> matcher.matches(path));
@@ -94,6 +96,7 @@ public class SearchFile {
         fa.activateOptions();
         org.apache.log4j.Logger.getRootLogger().addAppender(fa);
     }
+
     public static void main(String[] args) throws IOException {
         List<Path> paths = get(args);
         setLogProperties(value("o"));
