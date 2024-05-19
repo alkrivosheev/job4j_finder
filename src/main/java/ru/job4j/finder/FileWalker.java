@@ -27,8 +27,7 @@ public FileWalker(Predicate<Path> condition) {
     @Override
     public FileVisitResult visitFile(Path file,
             BasicFileAttributes attributes) throws IOException {
-
-        if (this.condition.test(file.getFileName())) {
+        if (condition.test(file.getFileName())) {
             paths.add(file);
         }
         return CONTINUE;
