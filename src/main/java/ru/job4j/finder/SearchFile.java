@@ -37,6 +37,14 @@ public class SearchFile {
             }
             MAP_VAL.put(words[0], words[1]);
         }
+        if ("regex".equals(value("t"))) {
+            String regex = value("n");
+            try {
+                Pattern.compile(regex);
+            } catch (PatternSyntaxException exception) {
+                throw new PatternSyntaxException(String.format("Error: This regex '%s' does not valid", regex), regex, -1);
+            }
+        }
         res = true;
 
         return res;
@@ -52,37 +60,30 @@ public class SearchFile {
         return searcher.getPaths();
     }
 
-    private static void testRegex(String regex) {
-        try {
-            Pattern.compile(regex);
-        } catch (PatternSyntaxException exception) {
-            throw new PatternSyntaxException(String.format("Error: This regex '%s' does not valid", regex), regex, -1);
-        }
-    }
-
-    public static List<Path> get(String[] args) throws IOException {
-        List<Path> res = new ArrayList<>();
-        if (validate(args)) {
-            Path start = Paths.get(value("d"));
-            switch (value("t")) {
-                case "name" -> {
-                    res = search(start, path -> path.toFile().getName().endsWith(value("n")));
-                }
-                case "mask" -> {
-                    PathMatcher matcher =  FileSystems.getDefault().getPathMatcher("glob:" + value("n"));
-                    res = search(start, path -> matcher.matches(path));
-                }
-                case "regex" -> {
-                    testRegex(value("n"));
-                    PathMatcher matcher =  FileSystems.getDefault().getPathMatcher("regex:" + value("n"));
-                    res = search(start, path -> matcher.matches(path));
-                }
-                default -> {
-                    throw new IllegalArgumentException(String.format("Parameter '%s' are not specified. ", value("t")));
-                }
+        public static List<Path> get(String[] args) throws IOException {
+            List<Path> res = new ArrayList<>();
+            if (validate(args)) {
+                Path start = Paths.get(value("d"));
+                Predicate<Path> predicate = createPredicate(value("t"), value("n"));
+                res = search(start, predicate);
             }
+            return res;
         }
-        return res;
+
+    private static Predicate<Path> createPredicate(String type, String pattern) {
+        PathMatcher matcher;
+        switch (type) {
+            case "name":
+                return path -> path.toFile().getName().endsWith(pattern);
+            case "mask":
+                matcher = FileSystems.getDefault().getPathMatcher("glob:" + pattern);
+                return path -> matcher.matches(path);
+            case "regex":
+                matcher = FileSystems.getDefault().getPathMatcher("regex:" + pattern);
+                return path -> matcher.matches(path);
+            default:
+                throw new IllegalArgumentException(String.format("Parameter '%s' are not specified. ", type));
+        }
     }
 
     private static void setLogProperties(String fileName) {
