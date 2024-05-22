@@ -13,77 +13,50 @@ import java.util.regex.PatternSyntaxException;
 
 public class SearchFile {
     private static final Logger LOG = LoggerFactory.getLogger(SearchFile.class.getName());
-    private static final Map<String, String> MAP_VAL = new HashMap<>();
+    private static final String DIRECTORY_KEY = "d";
+    private static final String NAME_KEY = "n";
+    private static final String TYPE_KEY = "t";
+    private static final String OUTPUT_KEY = "o";
 
-    public static boolean validate(String[] args) {
-        boolean res;
-        if (args.length < 4) {
-            throw new IllegalArgumentException("Parameters are not specified. Usage: ROOT_FOLDER file_name search_type file_result");
+    public static List<Path> get(String[] args) throws IOException {
+        ArgsName argsName = ArgsName.of(args);
+        validate(argsName);
+
+        Path start = Paths.get(argsName.get(DIRECTORY_KEY));
+        Predicate<Path> predicate = createPredicate(argsName.get(NAME_KEY), argsName.get(TYPE_KEY));
+        return search(start, predicate);
+    }
+
+    private static void validate(ArgsName argsName) {
+        Path directory = Paths.get(argsName.get(DIRECTORY_KEY));
+        if (!Files.exists(directory) || !Files.isDirectory(directory)) {
+            throw new IllegalArgumentException(String.format("Error: This Directory '%s' not exists. Use folder name for search. Usage: ' . ' or ' C:\\' ", directory));
         }
-        for (String parameter : args) {
-            if (!parameter.startsWith("-")) {
-                throw new IllegalArgumentException(String.format("Error: This argument '%s' does not start with a '-' character", parameter));
-            }
-            if (!parameter.contains("=")) {
-                throw new IllegalArgumentException(String.format("Error: This argument '%s' does not contain an equal sign", parameter));
-            }
-            String[] words = parameter.split("=", 2);
-            words[0] = words[0].replace("-", "");
-            if ("d".equals(words[0]) && (!Files.exists(Path.of(words[1])) || !Files.isDirectory(Path.of(words[1])))) {
-                throw new IllegalArgumentException(String.format("Error: This Directory '%s' not exists. Use folder name for search. Usage: ' . ' or ' C:\\' ", words[1]));
-            }
-            if ("o".equals(words[0]) && !Files.exists(Path.of(words[1]).toAbsolutePath().getParent())) {
-                throw new IllegalArgumentException(String.format("Error: This Directory '%s' not exists. Use folder name for Log directory. Usage: ' logs\\ ' or ' C:\\' ", words[1]));
-            }
-            MAP_VAL.put(words[0], words[1]);
+
+        Path output = Paths.get(argsName.get(OUTPUT_KEY));
+        if (!Files.exists(output.toAbsolutePath().getParent())) {
+            throw new IllegalArgumentException(String.format("Error: This Directory '%s' not exists. Use folder name for Log directory. Usage: ' logs\\ ' or ' C:\\' ", output));
         }
-        if ("regex".equals(value("t"))) {
-            String regex = value("n");
+
+        if ("regex".equals(argsName.get(TYPE_KEY))) {
             try {
-                Pattern.compile(regex);
+                Pattern.compile(argsName.get(NAME_KEY));
             } catch (PatternSyntaxException exception) {
-                throw new PatternSyntaxException(String.format("Error: This regex '%s' does not valid", regex), regex, -1);
+                throw new PatternSyntaxException(String.format("Error: This regex '%s' does not valid", argsName.get(NAME_KEY)), argsName.get(NAME_KEY), -1);
             }
         }
-        res = true;
-
-        return res;
     }
 
-    public static String value(String key) {
-        return MAP_VAL.get(key);
-    }
-
-    public static List<Path> search(Path root, Predicate<Path> condition) throws IOException {
+    private static List<Path> search(Path root, Predicate<Path> condition) throws IOException {
         FileWalker searcher = new FileWalker(condition);
         Files.walkFileTree(root, searcher);
         return searcher.getPaths();
     }
 
-        public static List<Path> get(String[] args) throws IOException {
-            List<Path> res = new ArrayList<>();
-            if (validate(args)) {
-                Path start = Paths.get(value("d"));
-                Predicate<Path> predicate = createPredicate(value("t"), value("n"));
-                res = search(start, predicate);
-            }
-            return res;
-        }
-
-    private static Predicate<Path> createPredicate(String type, String pattern) {
-        PathMatcher matcher;
-        switch (type) {
-            case "name":
-                return path -> path.toFile().getName().endsWith(pattern);
-            case "mask":
-                matcher = FileSystems.getDefault().getPathMatcher("glob:" + pattern);
-                return path -> matcher.matches(path);
-            case "regex":
-                matcher = FileSystems.getDefault().getPathMatcher("regex:" + pattern);
-                return path -> matcher.matches(path);
-            default:
-                throw new IllegalArgumentException(String.format("Parameter '%s' are not specified. ", type));
-        }
+    private static Predicate<Path> createPredicate(String pattern, String typeSearch) {
+        String prefix = "mask".equals(typeSearch) ? "glob:" : "regex:";
+        PathMatcher matcher = FileSystems.getDefault().getPathMatcher(prefix + pattern);
+        return p -> matcher.matches(p.getFileName());
     }
 
     private static void setLogProperties(String fileName) {
@@ -99,8 +72,12 @@ public class SearchFile {
     }
 
     public static void main(String[] args) throws IOException {
+        ArgsName argsName = ArgsName.of(args);
+        validate(argsName);
+
         List<Path> paths = get(args);
-        setLogProperties(value("o"));
+        setLogProperties(argsName.get(OUTPUT_KEY));
+
         LOG.info("Start program");
         for (Path path : paths) {
             System.out.println(path);
