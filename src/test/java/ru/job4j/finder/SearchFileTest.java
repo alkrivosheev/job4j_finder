@@ -4,6 +4,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.CleanupMode;
 import org.junit.jupiter.api.io.TempDir;
+
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -97,6 +99,6 @@ class SearchFileTest {
         String dirName = "-d=" + tempDir.toAbsolutePath();
         assertThatThrownBy(() -> SearchFile.get(new String[]{dirName, "-n=^[A-Za-z]{1,12}\\.[A-Za-z]{1,3}$", "-t=regex", "-o=logs1/debug1.txt"}))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Error: This Directory 'logs1\\debug1.txt' not exists. Use folder name for Log directory. Usage: ' logs\\ ' or ' C:\\' ");
+                .hasMessageContaining(String.format("Error: This Directory 'logs1%sdebug1.txt' not exists. Use folder name for Log directory. Usage: ' logs\\ ' or ' C:\\' ", File.separator));
     }
 }
